@@ -1,4 +1,3 @@
-Here's a description tailored for a GitHub project, explaining that the password generator is secure, local, and doesn't involve any servers:
 
 ---
 
