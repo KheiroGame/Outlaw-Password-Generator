@@ -25,10 +25,6 @@ This password generator is designed with **privacy and security** in mind. All p
 - The generated `.exe` file is **completely self-contained**, meaning users do not need to install Python or any additional dependencies.
 - Once compiled, the program runs independently and securely without requiring external libraries or connections.
 
-### 5. **Open Source and Transparent**
-- This project is **open source**, allowing anyone to inspect the code to ensure that no data is being sent to external servers or logged inappropriately.
-- Transparency is key—any user can review and confirm that the program **does not include any hidden network calls** or data transmission mechanisms.
-
 ### 6. **Network Security**
 - You can use a firewall or network monitoring tool to verify that the program **does not attempt to connect to the internet** or any external servers.
 - The program performs no network operations whatsoever—**everything is handled locally**.
