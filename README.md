@@ -1,7 +1,7 @@
 
 ---
 
-# Outlaw Password Manager
+# Outlaw Password Generator
 
 **Outlaw Password Manager** is a secure password management tool that allows users to generate, encrypt, save, and manage their passwords, all protected by a master password. The project supports both English and French languages and includes several key features designed for ease of use and security.
 
