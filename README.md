@@ -1,42 +1,30 @@
 
 ---
 
-# Secure Local Password Generator
+# Outlaw Password Manager
 
-This password generator is designed with **privacy and security** in mind. All password generation and storage happen **entirely on your local machine**, ensuring that your sensitive data is never transmitted online or stored on any external server.
+**Outlaw Password Manager** is a secure password management tool that allows users to generate, encrypt, save, and manage their passwords, all protected by a master password. The project supports both English and French languages and includes several key features designed for ease of use and security.
 
 ## Key Features:
-
-### 1. **No Server-Side Processing**
-- The generator operates **100% locally** on your computer.
-- None of your passwords, usernames, or application details are ever sent to a server or stored on the cloud.
-- All data remains on your device, providing full control and privacy over your information.
-
-### 2. **Local Encryption**
-- All passwords are encrypted using **industry-standard encryption** before being saved to a file.
-- The encryption key is derived from a master password that **only you know**, ensuring that your saved passwords are secure.
-- Both the encryption and decryption of passwords are handled **entirely on your device**.
-
-### 3. **Offline Functionality**
-- The application can run in **offline mode**, meaning it does not require an internet connection to function. 
-- This guarantees that no data is ever transmitted over the internet, providing complete privacy.
-
-### 4. **Self-Contained `.exe`**
-- The generated `.exe` file is **completely self-contained**, meaning users do not need to install Python or any additional dependencies.
-- Once compiled, the program runs independently and securely without requiring external libraries or connections.
-
-### 6. **Network Security**
-- You can use a firewall or network monitoring tool to verify that the program **does not attempt to connect to the internet** or any external servers.
-- The program performs no network operations whatsoever—**everything is handled locally**.
+- **Master Password Protection**: Protect all your passwords using a master password. The master password is hashed using SHA-256, and the passwords are encrypted with Fernet encryption.
+- **Password Generation**: Generate strong random passwords with customizable options such as including symbols and setting password length.
+- **Encrypted Local Storage**: All passwords are securely stored locally in an encrypted file (`passwords.enc`). There is **no internet connection required**, ensuring that your passwords are never uploaded or sent to any server, providing **maximum security** and privacy.
+- **Multi-language Support**: Switch between English and French with a single button click. The tool dynamically updates its interface to match the selected language.
+- **Copy Passwords**: Copy generated or stored passwords directly to your clipboard for easy use.
+- **Subscription Management**: Keep track of whether the stored passwords are for services with active subscriptions.
+- **Password Display Toggle**: Show or hide the stored passwords with a toggle button, ensuring privacy when needed.
+- **Delete Passwords**: Securely delete passwords with master password verification.
+- **Customizable UI**: The tool offers fullscreen and windowed modes, and the GUI can be resized or centered on the screen.
 
 ## How It Works:
-1. Upon first launch, the program asks you to set a **master password**, which is used to encrypt and decrypt your saved passwords.
-2. Passwords are generated locally and stored in an encrypted file on your machine, accessible only with your master password.
-3. The program runs completely offline, ensuring that your data stays on your machine and **never leaves your local environment**.
+1. **Master Password**: Upon first use, the user is prompted to create a master password. This password will be used to derive an encryption key for securely storing and retrieving passwords.
+2. **Password Management**: Users can generate passwords for various applications, encrypt them, and save them to a file. These saved passwords can be listed, displayed, copied, or deleted, with master password verification required for deletion.
+3. **No Internet Connection Needed**: The application operates entirely offline, meaning no passwords or sensitive information are ever uploaded to any server. All passwords are securely stored **locally** on your device.
+4. **Language Support**: The tool supports both French and English, with an easy toggle button that switches between languages and updates all interface labels.
 
----
+## Ready to Use:
+The application is provided as a standalone `.exe` file. No additional installation or setup is required—just open the executable and start managing your passwords securely.
 
-By using this password generator, you can trust that **your data remains private**, secure, and under your control at all times. Nothing is sent to servers, and everything happens **locally on your machine**.
 
 ---
 
