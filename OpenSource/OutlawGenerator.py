@@ -2,12 +2,12 @@ import os
 import random
 import string
 import hashlib
-from cryptography.fernet import Fernet, InvalidToken  # Ajout d'InvalidToken ici
+from cryptography.fernet import Fernet, InvalidToken
 from base64 import urlsafe_b64encode
 import tkinter as tk
 from tkinter import messagebox
 
-# Dictionnaire de traduction
+# Translation dictionary for English and French
 translations = {
     'fr': {
         'title': "Outlaw Gestionnaire de Mot de Passe",
@@ -63,11 +63,14 @@ translations = {
     }
 }
 
-# Variable pour stocker la langue actuelle
+# Current language variable
 current_language = 'en'
 
-# Fonction pour mettre à jour les textes
 def update_language():
+    """
+    Updates the text labels and button names according to the current language setting.
+    It pulls the translated strings from the 'translations' dictionary based on the current language.
+    """
     title_label.config(text=translations[current_language]['title'])
     generate_button.config(text=translations[current_language]['generate_password'])
     app_label.config(text=translations[current_language]['app_name'])
@@ -77,44 +80,97 @@ def update_language():
     length_label.config(text=translations[current_language]['length'])
     language_button.config(text=translations[current_language]['language_button'])
 
-# Fonction pour basculer entre les langues
 def toggle_language():
+    """
+    Switches between 'en' (English) and 'fr' (French) for the application's interface.
+    Updates the UI after changing the language.
+    """
     global current_language
     current_language = 'en' if current_language == 'fr' else 'fr'
-    update_language()  # Met à jour les textes après changement de langue
+    update_language()
 
-# Fonction pour centrer une fenêtre sur l'écran
 def center_window(window, width=800, height=600):
+    """
+    Centers the given window on the user's screen.
+
+    Parameters:
+    - window (tk.Tk or tk.Toplevel): The window to center.
+    - width (int): The width of the window. Defaults to 800.
+    - height (int): The height of the window. Defaults to 600.
+    """
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
     x = (screen_width // 2) - (width // 2)
     y = (screen_height // 2) - (height // 2)
     window.geometry(f"{width}x{height}+{x}+{y}")
 
-# Fonction pour générer le mot de passe en fonction des options sélectionnées
 def generate_password(length=16, use_symbols=True):
+    """
+    Generates a random password using letters, digits, and optional symbols.
+
+    Parameters:
+    - length (int): The length of the generated password. Defaults to 16.
+    - use_symbols (bool): Whether to include symbols in the password. Defaults to True.
+
+    Returns:
+    - str: The generated password.
+    """
     chars = string.ascii_letters + string.digits
     if use_symbols:
-        chars += string.punctuation  # Ajouter des symboles si la case est cochée
+        chars += string.punctuation
     return ''.join(random.choice(chars) for _ in range(length))
 
-# Génération d'une clé de chiffrement à partir du mot de passe maître
 def derive_key_from_master_password(master_password):
+    """
+    Derives an encryption key from the master password using SHA-256 hashing.
+
+    Parameters:
+    - master_password (str): The master password to derive the key from.
+
+    Returns:
+    - bytes: A base64-encoded encryption key.
+    """
     digest = hashlib.sha256(master_password.encode()).digest()
     return urlsafe_b64encode(digest)
 
-# Chiffrement du texte
 def encrypt_message(message, key):
+    """
+    Encrypts a plaintext message using the provided encryption key.
+
+    Parameters:
+    - message (str): The plaintext message to encrypt.
+    - key (bytes): The encryption key derived from the master password.
+
+    Returns:
+    - bytes: The encrypted message.
+    """
     fernet = Fernet(key)
     return fernet.encrypt(message.encode())
 
-# Déchiffrement du texte
 def decrypt_message(encrypted_message, key):
+    """
+    Decrypts an encrypted message using the provided encryption key.
+
+    Parameters:
+    - encrypted_message (bytes): The message to decrypt.
+    - key (bytes): The encryption key to use for decryption.
+
+    Returns:
+    - str: The decrypted message (plaintext).
+    """
     fernet = Fernet(key)
     return fernet.decrypt(encrypted_message).decode()
 
-# Fonction pour enregistrer le mot de passe généré et l'état de l'abonnement
 def save_password(application, username, password, is_active):
+    """
+    Encrypts and saves the generated password to a file, along with the associated application and username.
+
+    Parameters:
+    - application (str): The name of the application associated with the password.
+    - username (str): The username for the application.
+    - password (str): The generated password to save.
+    - is_active (int): A flag to indicate whether the subscription is active (1) or not (0).
+    """
     encrypted_username = encrypt_message(username, key)
     encrypted_password = encrypt_message(password, key)
 
@@ -125,8 +181,11 @@ def save_password(application, username, password, is_active):
                         f"{translations[current_language]['save_success']} {application} et l'utilisateur {username}.")
     update_password_list()
 
-# Fonction pour générer et enregistrer le mot de passe
 def generate_and_save_password():
+    """
+    Generates a password based on the user’s selected options (length and symbol inclusion),
+    then saves the generated password along with application and username details.
+    """
     application = app_entry.get()
     username = user_entry.get()
 
@@ -134,28 +193,25 @@ def generate_and_save_password():
         messagebox.showwarning(translations[current_language]['error'], translations[current_language]['fill_fields'])
         return
 
-    # Récupérer les paramètres sélectionnés
-    use_symbols = symbol_var.get() == 1  # Vérifier si la case des symboles est cochée
-    length = 16 if length_var.get() == 1 else 12  # Longueur 12 ou 16 caractères
+    use_symbols = symbol_var.get() == 1
+    length = 16 if length_var.get() == 1 else 12
 
     password = generate_password(length=length, use_symbols=use_symbols)
-    
-    # Récupérer l'état de la case à cocher de l'abonnement
     is_active = 1 if subscription_var.get() == 1 else 0
     
     try:
-        # Sauvegarde du mot de passe généré
-        print("Tentative de sauvegarde du mot de passe")
         save_password(application, username, password, is_active)
-        print("Mot de passe sauvegardé avec succès")
     except InvalidToken:
-        print("Erreur InvalidToken détectée")
-        messagebox.showerror(translations[current_language]['error'], 
-                             translations[current_language]['master_password_error'])
+        messagebox.showerror(translations[current_language]['error'], translations[current_language]['master_password_error'])
         return
 
-# Fonction pour lister les mots de passe enregistrés
 def list_applications():
+    """
+    Reads and decrypts the list of saved applications, usernames, and passwords from the encrypted file.
+
+    Returns:
+    - list: A list of tuples containing application names, encrypted usernames, encrypted passwords, and subscription status.
+    """
     if not os.path.exists("passwords.enc"):
         return []
 
@@ -166,74 +222,76 @@ def list_applications():
             parts = line.strip().split("||")
             if len(parts) == 3:
                 app_name, encrypted_username, encrypted_password = parts
-                is_active = "0"  # Par défaut, inactif si non précisé
+                is_active = "0"
             elif len(parts) == 4:
                 app_name, encrypted_username, encrypted_password, is_active = parts
             else:
-                print(f"Ligne mal formatée : {line}")
                 continue
             applications.append((app_name, encrypted_username, encrypted_password, is_active))
     
     return applications
 
-# Fonction pour afficher/masquer le mot de passe
 def toggle_display(app_frame, app_choice, username_choice, button):
+    """
+    Toggles between showing and hiding the username and password for a specific application in the UI.
+
+    Parameters:
+    - app_frame (tk.Frame): The frame containing the application details.
+    - app_choice (str): The name of the application.
+    - username_choice (str): The encrypted username for the application.
+    - button (tk.Button): The button to toggle between show/hide states.
+    """
     if button.cget("text") == translations[current_language]['show']:
         with open("passwords.enc", "r") as file:
             lines = file.readlines()
             for line in lines:
                 parts = line.strip().split("||")
-                if len(parts) == 3:
-                    app_name, encrypted_username, encrypted_password = parts
-                elif len(parts) == 4:
-                    app_name, encrypted_username, encrypted_password, is_active = parts
-                else:
-                    continue
+                if app_choice in line and username_choice in line:
+                    username = decrypt_message(username_choice.encode(), key)
+                    password = decrypt_message(parts[2].encode(), key)
 
-                if app_name == app_choice and encrypted_username == username_choice:
-                    username = decrypt_message(encrypted_username.encode(), key)
-                    password = decrypt_message(encrypted_password.encode(), key)
-
-                    # Afficher les valeurs déchiffrées
                     button.username_label.config(text=username)
                     button.password_label.config(text=password)
                     button.config(text=translations[current_language]['hide'])
 
-                    # Stocker le mot de passe déchiffré dans l'objet app_frame pour le copier plus tard
                     app_frame.real_password = password
-
-                    # Met à jour le bouton copier pour copier le mot de passe déchiffré
                     app_frame.copy_button.config(command=lambda: copy_to_clipboard(app_frame.real_password, main_window))
     else:
         button.username_label.config(text="****")
         button.password_label.config(text="****")
         button.config(text=translations[current_language]['show'])
-        # Toujours utiliser le mot de passe réel, même s'il est masqué
-        app_frame.copy_button.config(command=lambda: copy_to_clipboard(app_frame.real_password, main_window))
 
-# Fonction pour copier le mot de passe dans le presse-papiers
 def copy_to_clipboard(password, window):
+    """
+    Copies the given password to the system clipboard.
+
+    Parameters:
+    - password (str): The password to copy.
+    - window (tk.Tk): The main window of the application to display the success message.
+    """
     window.clipboard_clear()
     window.clipboard_append(password)
     messagebox.showinfo(translations[current_language]['copy'], translations[current_language]['password_copied'])
 
-# Fonction pour demander la confirmation avec le mot de passe maître avant suppression
 def confirm_delete_password(app_name, encrypted_username):
+    """
+    Prompts the user to enter the master password for confirmation before deleting a saved password.
+
+    Parameters:
+    - app_name (str): The name of the application whose password is being deleted.
+    - encrypted_username (str): The encrypted username associated with the application.
+    """
     def check_master_password():
         entered_password = password_entry.get()
-
-        # Hacher le mot de passe saisi et vérifier s'il correspond au mot de passe maître stocké
         hashed_input = hashlib.sha256(entered_password.encode()).hexdigest()
         
         if key.decode() == urlsafe_b64encode(hashlib.sha256(entered_password.encode()).digest()).decode():
-            # Mot de passe correct, on supprime
             delete_password(app_name, encrypted_username)
             master_prompt.destroy()
         else:
             messagebox.showerror(translations[current_language]['error'], translations[current_language]['validation_error'])
             master_prompt.destroy()
 
-    # Fenêtre pour demander le mot de passe maître
     master_prompt = tk.Toplevel(main_window)
     master_prompt.title(translations[current_language]['confirm'])
     center_window(master_prompt, 300, 150)
@@ -247,30 +305,30 @@ def confirm_delete_password(app_name, encrypted_username):
     confirm_button = tk.Button(master_prompt, text=translations[current_language]['confirm'], command=check_master_password)
     confirm_button.pack(pady=10)
 
-# Fonction pour supprimer un mot de passe
 def delete_password(app_name, encrypted_username):
+    """
+    Deletes the saved password for a specific application by removing it from the file.
+
+    Parameters:
+    - app_name (str): The name of the application whose password is being deleted.
+    - encrypted_username (str): The encrypted username associated with the application.
+    """
     with open("passwords.enc", "r") as file:
         lines = file.readlines()
 
     with open("passwords.enc", "w") as file:
         for line in lines:
             parts = line.strip().split("||")
-            if len(parts) == 3:
-                stored_app_name, stored_encrypted_username, stored_encrypted_password = parts
-            elif len(parts) == 4:
-                stored_app_name, stored_encrypted_username, stored_encrypted_password, stored_is_active = parts
-
-            # Si l'application et le nom d'utilisateur ne correspondent pas, on garde la ligne
-            if stored_app_name == app_name and stored_encrypted_username == encrypted_username:
-                continue  # Ne pas réécrire cette ligne pour la supprimer
-
-            # Réécrire les lignes non supprimées
+            if parts[0] == app_name and parts[1] == encrypted_username:
+                continue
             file.write(line + "\n")
 
-    update_password_list()  # Mettre à jour la liste après suppression
+    update_password_list()
 
-# Fonction pour mettre à jour la liste des mots de passe affichés
 def update_password_list():
+    """
+    Clears and updates the UI list of saved applications, showing the encrypted usernames and masked passwords.
+    """
     for widget in password_frame.winfo_children():
         widget.destroy()
 
@@ -293,14 +351,11 @@ def update_password_list():
             password_label.grid(row=0, column=3, sticky="nsew")
 
             try:
-                # Tentative de déchiffrement des données
                 real_username = decrypt_message(encrypted_username.encode(), key)
                 real_password = decrypt_message(encrypted_password.encode(), key)
-                app_frame.real_password = real_password  # Stocker le mot de passe déchiffré
+                app_frame.real_password = real_password
             except InvalidToken:
-                # Si le mot de passe maître est incorrect, afficher un message d'erreur
-                messagebox.showerror(translations[current_language]['error'],
-                                     translations[current_language]['master_password_error'])
+                messagebox.showerror(translations[current_language]['error'], translations[current_language]['master_password_error'])
                 return
 
             view_button = tk.Button(app_frame, text=translations[current_language]['show'])
@@ -322,85 +377,95 @@ def update_password_list():
                                                 command=lambda a=app_name, u=encrypted_username, v=subscription_var: update_subscription_status(a, u, v.get()))
             subscription_check.grid(row=0, column=6, sticky="nsew")
 
-
-# Fonction pour mettre à jour l'état de l'abonnement
 def update_subscription_status(app_name, encrypted_username, is_active):
+    """
+    Updates the subscription status (active or inactive) of a saved application in the file.
+
+    Parameters:
+    - app_name (str): The name of the application whose subscription status is being updated.
+    - encrypted_username (str): The encrypted username associated with the application.
+    - is_active (int): The new subscription status (1 for active, 0 for inactive).
+    """
     with open("passwords.enc", "r") as file:
         lines = file.readlines()
 
     with open("passwords.enc", "w") as file:
         for line in lines:
             parts = line.strip().split("||")
-            if len(parts) == 3:
-                stored_app_name, stored_encrypted_username, stored_encrypted_password = parts
-                stored_is_active = "0"
-            elif len(parts) == 4:
-                stored_app_name, stored_encrypted_username, stored_encrypted_password, stored_is_active = parts
+            if parts[0] == app_name and parts[1] == encrypted_username:
+                parts[3] = str(is_active)
+            file.write(f"{parts[0]}||{parts[1]}||{parts[2]}||{parts[3]}\n")
 
-            if stored_app_name == app_name and stored_encrypted_username == encrypted_username:
-                stored_is_active = str(is_active)
-
-            file.write(f"{stored_app_name}||{stored_encrypted_username}||{stored_encrypted_password}||{stored_is_active}\n")
-
-# Fonction pour gérer la fermeture de l'application
 def on_closing():
+    """
+    Handles the closing of the application by showing a confirmation dialog and quitting the application cleanly if confirmed.
+    """
     if messagebox.askokcancel(translations[current_language]['close'], translations[current_language]['quit']):
-        master_window.destroy()  # Fermer la fenêtre principale
-        main_window.quit()       # Quitter Tkinter
-        main_window.destroy()    # Détruire toute fenêtre restante
-        os._exit(0)              # Quitter l'application sans erreur
+        master_window.destroy()
+        main_window.quit()
+        main_window.destroy()
+        os._exit(0)
 
-# Sauvegarde du mot de passe maître
 def save_master_password(master_password):
-    # Hacher le mot de passe maître, mais ne plus l'enregistrer dans un fichier
-    hashed_password = hashlib.sha256(master_password.encode()).hexdigest()
-    return hashed_password
+    """
+    Hashes and returns the master password. This is used for comparison when validating the master password.
+    
+    Parameters:
+    - master_password (str): The master password to hash.
 
-# Variable pour indiquer si le mot de passe maître est valide
-master_password_valid = False
+    Returns:
+    - str: The hashed master password.
+    """
+    return hashlib.sha256(master_password.encode()).hexdigest()
 
-# Vérification du mot de passe maître
 def verify_master_password():
+    """
+    Verifies the master password entered by the user. If it matches the stored password, allows access to the application.
+    """
     global key
     global master_password_valid
     master_password_input = master_entry.get()
 
-    if not os.path.exists("passwords.enc"):  # Si c'est la première exécution et qu'on crée un mot de passe maître
-        confirm_password = confirm_master_entry.get()  # Vérifier la confirmation uniquement si le champ existe
+    if not os.path.exists("passwords.enc"):
+        confirm_password = confirm_master_entry.get()
 
         if master_password_input == confirm_password:
             key = derive_key_from_master_password(master_password_input)
-            master_password_valid = True  # Le mot de passe est correct
-            messagebox.showinfo("Succès", translations[current_language]['confirm_password'])
+            master_password_valid = True
+            messagebox.showinfo("Success", translations[current_language]['confirm_password'])
             master_window.destroy()
             open_main_window()
         else:
-            master_password_valid = False  # Mauvais mot de passe maître
+            master_password_valid = False
             messagebox.showerror(translations[current_language]['error'], translations[current_language]['validation_error'])
-    else:  # Si le fichier existe déjà, on vérifie simplement le mot de passe saisi
+    else:
         key = derive_key_from_master_password(master_password_input)
         try:
-            # Test pour voir si la clé fonctionne en essayant de déchiffrer un ancien mot de passe (facultatif, à adapter)
-            if list_applications():  # Teste s'il y a des mots de passe à déchiffrer
+            if list_applications():
                 decrypt_message(list_applications()[0][1].encode(), key)
             master_password_valid = True
             master_window.destroy()
             open_main_window()
         except InvalidToken:
-            master_password_valid = False  # Mauvais mot de passe maître
+            master_password_valid = False
             messagebox.showerror(translations[current_language]['error'], translations[current_language]['validation_error'])
 
-
-# Fonction pour activer ou désactiver le plein écran
 def toggle_fullscreen(event=None):
+    """
+    Enables fullscreen mode for the application window.
+    """
     main_window.attributes("-fullscreen", True)
 
-# Fonction pour quitter le plein écran
 def end_fullscreen(event=None):
+    """
+    Disables fullscreen mode for the application window.
+    """
     main_window.attributes("-fullscreen", False)
 
-# Ouvrir la fenêtre principale et configurer le redimensionnement automatique
 def open_main_window():
+    """
+    Opens the main application window and initializes the password management UI.
+    """
     global main_window
     global password_frame
     global subscription_var
@@ -417,29 +482,24 @@ def open_main_window():
 
     main_window = tk.Tk()
     main_window.title(translations[current_language]['title'])
-    center_window(main_window, 800, 600)  # Centrer la fenêtre principale
+    center_window(main_window, 800, 600)
 
-    # Rendre la fenêtre redimensionnable
     main_window.grid_rowconfigure(0, weight=1)
     main_window.grid_columnconfigure(0, weight=1)
 
     title_label = tk.Label(main_window, text=translations[current_language]['title'], font=("Arial", 16))
     title_label.pack(pady=10)
 
-    # Cadre pour les options de génération
     options_frame = tk.Frame(main_window)
     options_frame.pack(pady=10)
 
-    # Ajouter le bouton de changement de langue
     language_button = tk.Button(main_window, text=translations[current_language]['language_button'], command=toggle_language)
-    language_button.place(x=10, y=10)  # Position dans le coin supérieur gauche
+    language_button.place(x=10, y=10)
 
-    # Case à cocher pour les symboles
     symbol_var = tk.IntVar(value=1)
     symbol_check = tk.Checkbutton(options_frame, text=translations[current_language]['include_symbols'], variable=symbol_var)
     symbol_check.pack(side="left", padx=10)
 
-    # Radio pour la longueur du mot de passe
     length_var = tk.IntVar(value=1)
     length_label = tk.Label(options_frame, text=translations[current_language]['length'])
     length_label.pack(side="left", padx=10)
@@ -448,7 +508,6 @@ def open_main_window():
     length_radio_16.pack(side="left", padx=5)
     length_radio_12.pack(side="left", padx=5)
 
-    # Saisie du nom de l'application
     app_label = tk.Label(main_window, text=translations[current_language]['app_name'])
     app_label.pack(pady=5)
     global app_entry
@@ -461,77 +520,63 @@ def open_main_window():
     user_entry = tk.Entry(main_window, width=40)
     user_entry.pack(pady=5)
 
-    # Checkbox pour l'abonnement
     subscription_var = tk.IntVar()
     subscription_check = tk.Checkbutton(main_window, text=translations[current_language]['subscription_active'], variable=subscription_var)
     subscription_check.pack(pady=5)
 
-    # Bouton pour générer et sauvegarder le mot de passe
     generate_button = tk.Button(main_window, text=translations[current_language]['generate_password'], command=generate_and_save_password)
     generate_button.pack(pady=10)
 
-    # Cadre pour afficher les mots de passe enregistrés
     password_frame = tk.Frame(main_window, bg="white", relief="sunken", borderwidth=1)
     password_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-    update_password_list()  # Mettre à jour la liste des mots de passe
+    update_password_list()
 
-    # Ajouter les fonctionnalités de plein écran
     main_window.bind("<F11>", toggle_fullscreen)
     main_window.bind("<Escape>", end_fullscreen)
 
-    # Appeler update_language après la création de tous les widgets
     update_language()
 
     main_window.mainloop()
 
-# Fenêtre pour entrer ou créer le mot de passe maître
 def show_master_password_window():
+    """
+    Opens a window to prompt the user to enter or create the master password.
+    """
     global master_window, master_entry, confirm_master_entry
 
     master_window = tk.Tk()
     master_window.title(translations[current_language]['confirm_password'])
-    center_window(master_window, 350, 250)  # Centrer la fenêtre de connexion
+    center_window(master_window, 350, 250)
 
-    # Gérer la fermeture correcte
     master_window.protocol("WM_DELETE_WINDOW", on_closing)
 
     try:
-        # Si le fichier passwords.enc existe déjà (donc vérifier le mot de passe maître)
         if os.path.exists("passwords.enc"):
-            # Création du label pour entrer le mot de passe maître
             master_label = tk.Label(master_window, text=translations[current_language]['confirm_password'])
             master_label.pack(pady=10)
 
-            # Champ pour entrer le mot de passe maître
             master_entry = tk.Entry(master_window, show="*", width=30)
             master_entry.pack(pady=10)
 
-            # Bouton pour confirmer le mot de passe
             master_button = tk.Button(master_window, text=translations[current_language]['confirm'], command=verify_master_password)
             master_button.pack(pady=10)
         else:
-            # Si aucun fichier de mots de passe n'existe, création d'un nouveau mot de passe maître
             create_label_text = translations[current_language]['create_master_password']
             confirm_label_text = translations[current_language]['confirm_password']
 
-            # Label pour indiquer la création du mot de passe maître
             master_label = tk.Label(master_window, text=create_label_text)
             master_label.pack(pady=10)
 
-            # Champ pour entrer le nouveau mot de passe maître
             master_entry = tk.Entry(master_window, show="*", width=30)
             master_entry.pack(pady=10)
 
-            # Label pour la confirmation du mot de passe maître
             confirm_master_label = tk.Label(master_window, text=confirm_label_text)
             confirm_master_label.pack(pady=10)
 
-            # Champ pour confirmer le nouveau mot de passe maître
             confirm_master_entry = tk.Entry(master_window, show="*", width=30)
             confirm_master_entry.pack(pady=10)
 
-            # Avertissement à l'utilisateur sur la mémorisation du mot de passe
             warning_text = (
                 "Attention : mémorisez bien votre mot de passe !\n"
                 "Sinon, les mots de passe générés seront irrécupérables."
@@ -542,29 +587,33 @@ def show_master_password_window():
             warning_label = tk.Label(master_window, text=warning_text, fg="red")
             warning_label.pack(pady=10)
 
-            # Bouton pour confirmer le nouveau mot de passe maître
             master_button = tk.Button(master_window, text=translations[current_language]['confirm'], command=verify_master_password)
             master_button.pack(pady=10)
 
     except Exception as e:
-        # Affiche un message en cas d'erreur
-        messagebox.showerror(translations[current_language]['error'], f"Erreur inattendue : {str(e)}")
+        messagebox.showerror(translations[current_language]['error'], f"Unexpected error: {str(e)}")
 
     master_window.mainloop()
 
-# Appel de la fonction pour afficher la fenêtre principale
-show_master_password_window()
-
 def load_language():
-    """Charge la langue sauvegardée depuis un fichier, ou utilise 'fr' par défaut."""
+    """
+    Loads the saved language from a configuration file, or defaults to 'fr' if the file doesn't exist.
+
+    Returns:
+    - str: The loaded language.
+    """
     if os.path.exists("langue.conf"):
         with open("langue.conf", "r") as file:
             language = file.read().strip()
-            if language in translations:  # Vérifier si la langue est valide
+            if language in translations:
                 return language
-    return 'fr'  # Langue par défaut si le fichier n'existe pas ou si la langue est invalide
+    return 'fr'
 
 def save_language():
-    """Sauvegarde la langue actuelle dans un fichier."""
+    """
+    Saves the current language setting to a configuration file.
+    """
     with open("langue.conf", "w") as file:
         file.write(current_language)
+
+show_master_password_window()
