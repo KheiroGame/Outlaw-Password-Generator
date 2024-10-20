@@ -1,0 +1,89 @@
+
+---
+
+## Outlaw Password Manager - Open Source Instructions
+
+### Introduction
+This project is a password manager that allows you to generate, store, and manage passwords securely using encryption. The project is written in Python, and this guide will help you understand how to run the project from the source code and make any necessary changes.
+
+### Requirements
+
+To run this project, you will need to have the following installed on your machine:
+
+1. **Python 3.6 or higher**: The project is written in Python, so make sure you have Python installed.
+2. **Python Packages**:
+    - `cryptography`: Used for encryption and decryption of passwords.
+    - `tkinter`: Used for the graphical user interface (GUI).
+   
+To install the required dependencies, you can use the provided `requirements.txt` file.
+
+### Installation Steps
+
+1. **Clone or Download the Repository**:
+   First, download or clone this repository to your local machine.
+
+   ```bash
+   git clone https://github.com/yourusername/outlaw-password-manager.git
+   cd outlaw-password-manager
+   ```
+
+2. **Install the Required Dependencies**:
+   Use the `requirements.txt` file to install the necessary Python packages.
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   This will install the `cryptography` package, which is necessary for password encryption and decryption.
+
+3. **Running the Project**:
+   Once you have installed Python and the dependencies, you can run the project using the following command:
+
+   ```bash
+   python outlaw_password_manager.py
+   ```
+
+   This will launch the graphical interface where you can create, generate, and manage your passwords.
+
+### How to Modify or Build Your Own `.exe`
+
+If you want to build your own `.exe` file from the source code, you can use **PyInstaller** to bundle the Python script into a standalone executable.
+
+1. **Install PyInstaller**:
+   Install PyInstaller if it's not already installed:
+
+   ```bash
+   pip install pyinstaller
+   ```
+
+2. **Generate the Executable**:
+   Run the following command to generate a standalone `.exe` file:
+
+   ```bash
+   pyinstaller --onefile outlaw_password_manager.py
+   ```
+
+   This will create a `dist/` folder containing the `outlaw_password_manager.exe` file.
+
+3. **Distribute the Executable**:
+   You can now distribute the `outlaw_password_manager.exe` file, which can be run on Windows without requiring Python.
+
+### Modifying the Source Code
+
+If you want to modify the project, here are some key files and functions to explore:
+
+- **outlaw_password_manager.py**: This is the main script that handles the graphical user interface and encryption logic.
+    - **Functions**:
+      - `generate_password()`: Generates a random password.
+      - `encrypt_message()` and `decrypt_message()`: Handle encryption and decryption of passwords.
+      - `save_password()`: Encrypts and saves the password to a file.
+      - `update_password_list()`: Displays the list of saved passwords.
+
+You can modify these functions to add features or change the behavior of the password manager.
+
+### Contributing
+
+If you'd like to contribute to this project:
+1. Fork the repository.
+2. Make your changes in a separate branch.
+3. Open a pull request with a description of your changes.
